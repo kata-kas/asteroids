@@ -6,6 +6,10 @@ ASTEROID_KINDS = 3
 ASTEROID_SPAWN_RATE = 0.8  # seconds
 ASTEROID_MAX_RADIUS = ASTEROID_MIN_RADIUS * ASTEROID_KINDS
 
+PLAYER_INITIAL_LIVES = 3
+PLAYER_INVULNERABLE_TIME = 3  # Seconds of invulnerability after respawning
+PLAYER_RESPAWN_DELAY = 1  # Seconds to wait before respawning
+PLAYER_BLINK_RATE = 0.1  # How fast the player blinks when invulnerable
 PLAYER_RADIUS = 20 
 PLAYER_TURN_SPEED = 300
 PLAYER_SPEED = 200
