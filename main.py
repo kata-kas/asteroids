@@ -1,13 +1,11 @@
-import sys
-import time
 import pygame
 import constants
+from animated_background import AnimatedBackground
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from player import Player
 from shot import Shot
 from lives_display import LivesDisplay
-
 
 def main():
     print("Starting Asteroids!")
@@ -17,6 +15,13 @@ def main():
     screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     dt = 0
+
+    # Load animated background with reduced brightness (0.3 = 30% of original brightness)
+    try:
+        background = AnimatedBackground("sprites/bg.gif", brightness=0.3)
+    except Exception as e:
+        print(f"Error loading background: {e}")
+        background = None
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
@@ -42,7 +47,12 @@ def main():
             if event.type == pygame.QUIT:
                 return
 
-        screen.fill("black")
+        # Update and draw the animated background
+        if background:
+            background.update(dt)
+            background.draw(screen)
+        else:
+            screen.fill("black")
 
         # Game over state
         if game_over:
