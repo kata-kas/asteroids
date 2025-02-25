@@ -6,7 +6,7 @@ from shot import Shot
 
 
 class Player(CircleShape):
-    def __init__(self, x: int, y: int):
+    def __init__(self, x: int, y: int, sound_manager=None):
         super().__init__(x, y, constants.PLAYER_RADIUS)
         self.rotation = 0
         self.timer = 0
@@ -23,6 +23,7 @@ class Player(CircleShape):
         self.blink_timer = 0
         self.visible = True
         self.initial_position = pygame.Vector2(x, y)
+        self.sound_manager = sound_manager
 
     def draw(self, screen: pygame.SurfaceType):
         # Don't draw if blinking and not visible
@@ -91,6 +92,10 @@ class Player(CircleShape):
         shot_pos = self.position + forward * self.radius
         shot = Shot(shot_pos.x, shot_pos.y)
         shot.velocity = forward * constants.PLAYER_SHOT_SPEED
+
+        if self.sound_manager:
+            self.sound_manager.play('laser')
+
         return shot
 
     def lose_life(self):

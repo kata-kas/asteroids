@@ -6,6 +6,8 @@ from asteroidfield import AsteroidField
 from player import Player
 from shot import Shot
 from lives_display import LivesDisplay
+from sound_manager import SoundManager
+
 
 def main():
     print("Starting Asteroids!")
@@ -16,7 +18,8 @@ def main():
     clock = pygame.time.Clock()
     dt = 0
 
-    # Load animated background with reduced brightness (0.3 = 30% of original brightness)
+    sound_manager = SoundManager()
+
     try:
         background = AnimatedBackground("sprites/bg.gif", brightness=0.3)
     except Exception as e:
@@ -33,29 +36,31 @@ def main():
     AsteroidField.containers = updatable
     Shot.containers = updatable, drawable, shots
 
-    player = Player(constants.SCREEN_WIDTH / 2, constants.SCREEN_HEIGHT / 2)
+    player = Player(constants.SCREEN_WIDTH / 2, constants.SCREEN_HEIGHT / 2, sound_manager)
     lives_display = LivesDisplay()
     AsteroidField()
 
-    # Game state variables
     game_over = False
     respawn_timer = 0
     respawning = False
+    game_over_sound_played = False
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
 
-        # Update and draw the animated background
         if background:
             background.update(dt)
             background.draw(screen)
         else:
             screen.fill("black")
 
-        # Game over state
         if game_over:
+            if not game_over_sound_played:
+                sound_manager.play('game_over')
+                game_over_sound_played = True
+
             font = pygame.font.SysFont(None, 72)
             game_over_text = font.render("GAME OVER", True, (255, 0, 0))
             text_rect = game_over_text.get_rect(center=(constants.SCREEN_WIDTH / 2, constants.SCREEN_HEIGHT / 2))
@@ -68,7 +73,6 @@ def main():
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_r]:
-                # Reset game
                 player.kill()
                 for asteroid in asteroids:
                     asteroid.kill()
@@ -78,42 +82,37 @@ def main():
                 player = Player(constants.SCREEN_WIDTH / 2, constants.SCREEN_HEIGHT / 2)
                 AsteroidField()
                 game_over = False
+                game_over_sound_played = False
 
             pygame.display.flip()
             dt = clock.tick(60) / 1000
             continue
 
-        # Respawning state
         if respawning:
             respawn_timer -= dt
             if respawn_timer <= 0:
                 respawning = False
                 player.respawn()
 
-        # Draw all sprites
         for obj in drawable:
             obj.draw(screen)
-
-        # Update all sprites
         for obj in updatable:
             obj.update(dt)
 
-        # Check collisions if player is active
         if player.alive() and not respawning:
             for asteroid in asteroids:
                 if asteroid.collides_with(player):
                     if player.lose_life():
+                        sound_manager.play('dead')
+
                         if player.is_alive():
-                            # Start respawn timer
                             respawning = True
                             respawn_timer = constants.PLAYER_RESPAWN_DELAY
                         else:
-                            # Game over
                             game_over = True
                     break
 
-        # Check shot collisions
-        for asteroid in list(asteroids):  # Create a copy to avoid modification during iteration
+        for asteroid in list(asteroids):
             for shot in list(shots):
                 if asteroid.collides_with(shot):
                     new_asteroids = asteroid.split()
@@ -122,7 +121,6 @@ def main():
                     shot.kill()
                     break
 
-        # Draw the lives display
         lives_display.draw(screen, player.lives)
 
         pygame.display.flip()
