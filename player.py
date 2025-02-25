@@ -71,6 +71,17 @@ class Player(CircleShape):
         forward = pygame.Vector2(0, -1).rotate(self.rotation)
         self.position += forward * constants.PLAYER_SPEED * dt
 
+        # Wrap around screen edges
+        if self.position.x < 0:
+            self.position.x = constants.SCREEN_WIDTH
+        if self.position.x > constants.SCREEN_WIDTH:
+            self.position.x = 0
+
+        if self.position.y < 0:
+            self.position.y = constants.SCREEN_HEIGHT
+        elif self.position.y > constants.SCREEN_HEIGHT:
+            self.position.y = 0
+
     def shoot(self):
         self.timer = constants.PLAYER_SHOOT_COOLDOWN
         # Invert the forward vector to match sprite orientation
