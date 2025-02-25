@@ -12,6 +12,10 @@ def main():
     dt = 0
     
     player = Player(constants.SCREEN_WIDTH / 2, constants.SCREEN_HEIGHT / 2)
+    updatable = pygame.sprite.Group()
+    drawable = pygame.sprite.Group()
+    updatable.add(player)
+    drawable.add(player)
 
     while True:
         for event in pygame.event.get():
@@ -19,8 +23,10 @@ def main():
                 return
 
         screen.fill("black")
-        player.update(dt)
-        player.draw(screen)
+        for obj in drawable:
+            obj.draw(screen)
+        for obj in updatable:
+            obj.update(dt)
         pygame.display.flip()
         dt = clock.tick(60) / 1000
 
