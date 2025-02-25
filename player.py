@@ -8,6 +8,9 @@ from shot import Shot
 class Player(CircleShape):
     def __init__(self, x: int, y: int):
         super().__init__(x, y, constants.PLAYER_RADIUS)
+        self.sprite = pygame.image.load("sprites/spaceship.png").convert_alpha()
+        self.sprite = pygame.transform.scale(self.sprite, (constants.PLAYER_RADIUS * 2, constants.PLAYER_RADIUS * 2))
+        self.original_sprite = self.sprite.copy()
         self.rotation = 0
         self.timer = 0
 
@@ -20,7 +23,9 @@ class Player(CircleShape):
         return [a,b,c]
 
     def draw(self, screen: pygame.Surface):
-        pygame.draw.polygon(screen, "white", self.triangle(), 2)
+        rotated_sprite = pygame.transform.rotate(self.original_sprite, -self.rotation)
+        sprite_rect = rotated_sprite.get_rect(center=self.position)
+        screen.blit(rotated_sprite, sprite_rect)
 
     def rotate(self, dt: int):
         self.rotation += constants.PLAYER_TURN_SPEED * dt
@@ -39,12 +44,13 @@ class Player(CircleShape):
                 return self.shoot()
 
     def move(self, dt: int):
-        forward = pygame.Vector2(0, 1).rotate(self.rotation)
+        forward = pygame.Vector2(0, -1).rotate(self.rotation)
         self.position += forward * constants.PLAYER_SPEED * dt
 
     def shoot(self):
         self.timer = constants.PLAYER_SHOOT_COOLDOWN
-        forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        shot = Shot(self.position.x, self.position.y)
+        forward = pygame.Vector2(0, -1).rotate(self.rotation)
+        shot_pos = self.position + forward * self.radius
+        shot = Shot(int(shot_pos.x), int(shot_pos.y))
         shot.velocity = forward * constants.PLAYER_SHOT_SPEED
         return shot
